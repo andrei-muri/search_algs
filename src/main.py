@@ -151,7 +151,7 @@ def dfs(draw, grid, start, end):
         
         current = stack.get()
 
-        # If we reached the end, reconstruct the path
+
         if current == end:
             reconstruct_path(came_from, end, draw)
             end.make_end()
