@@ -5,3 +5,4 @@ class SearchAlgs(Enum):
     DEPTH = 1
     DIJKSTRA = 2
     ASTAR = 3
+    UCS = 4

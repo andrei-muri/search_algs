@@ -55,10 +55,21 @@ def h(p1, p2):
     return abs(x1 - x2) + abs(y1 - y2)
 
 def reconstruct_path(came_from, current, draw):
-	while current in came_from:
-		current = came_from[current]
-		current.make_path()
-		draw()
+    path = []
+    while current in came_from:
+        path.append(current.get_pos())
+        current = came_from[current]
+        current.make_path()
+        draw()
+    path.append(current.get_pos()) 
+    path.reverse()  
+    print("Path:")
+    print("Start:")
+    for coord in path:
+        print(f"  {coord},")
+    print("Goal")
+    print(f"Length: {len(path)} steps")
+
 
 def astar(draw, grid, start, end):
 	count = 0
@@ -135,7 +146,6 @@ def bfs(draw, grid, start, end):
 
     return False
 
-from queue import LifoQueue
 
 def dfs(draw, grid, start, end):
     stack = LifoQueue()
@@ -214,6 +224,49 @@ def dijkstra(draw, grid, start, end):
 
     return False
 
+def ucs(draw, grid, start, end):
+    count = 0
+    open_set = PriorityQueue()
+    open_set.put((0, count, start))
+    came_from = {}
+    cost_so_far = {spot: float("inf") for row in grid for spot in row}
+    cost_so_far[start] = 0
+
+    open_set_hash = {start}
+
+    while not open_set.empty():
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+
+        current = open_set.get()[2]
+        open_set_hash.remove(current)
+
+        if current == end:
+            reconstruct_path(came_from, end, draw)
+            end.make_end()
+            return True
+
+        for neighbor in current.neighbours:
+            new_cost = cost_so_far[current] + 1
+
+            if new_cost < cost_so_far[neighbor]:
+                came_from[neighbor] = current
+                cost_so_far[neighbor] = new_cost
+                if neighbor not in open_set_hash:
+                    count += 1
+                    open_set.put((new_cost, count, neighbor))
+                    open_set_hash.add(neighbor)
+                    neighbor.make_open()
+
+        draw()
+
+        if current != start:
+            current.make_closed()
+
+    return False
+
+
 def main(win, width):
 	ROWS = 50
 	grid = make_grid(ROWS, width)
@@ -268,6 +321,8 @@ def main(win, width):
 						dfs(lambda: draw(win, grid, ROWS, width), grid, start, end)
 					elif algorithm == SearchAlgs.DIJKSTRA:
 						dijkstra(lambda: draw(win, grid, ROWS, width), grid, start, end)
+					elif algorithm == SearchAlgs.UCS:
+						ucs(lambda: draw(win, grid, ROWS, width), grid, start, end)
 					else:
 						print("No valid search algorithm")
 
@@ -291,6 +346,10 @@ def main(win, width):
 				if event.key == pygame.K_i:
 					algorithm = SearchAlgs.DIJKSTRA
 					print(f"The searching algorithm is: {SearchAlgs.DIJKSTRA.name}")
+                              
+				if event.key == pygame.K_u:
+					algorithm = SearchAlgs.UCS
+					print(f"The searching algorithm is: {SearchAlgs.UCS.name}")
 
 	pygame.quit()
 

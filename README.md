@@ -1,3 +1,3 @@
 ﻿Inspired by Tech with Tim
 
-Added bfs, dfs and dijkstra
+Added bfs, dfs, ucs and dijkstra
